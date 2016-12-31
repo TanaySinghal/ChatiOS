@@ -1,0 +1,10 @@
+{
+	"name": "learning-socket",
+	"version": "0.0.1",
+	"description": "my first socket.io app",
+	"author": "Tanay Singhal",
+	"dependencies": {
+    	"express": "*",
+			"socket.io": "*"
+	}
+}

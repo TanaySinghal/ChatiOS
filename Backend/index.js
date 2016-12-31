@@ -8,17 +8,23 @@ app.get('/', function (req, res) {
 });
 
 io.on('connection', function(socket){
-  //console.log('a user connected');
-  var username = "user_" + (Math.floor(Math.random()*90000) + 10000).toString();
 
+  // How to create user from front end instead...
+  var username = "user_" + (Math.floor(Math.random()*90000) + 10000).toString();
   io.emit("connected", username);
 
-  socket.on("chat message", function(msg){
-    io.emit("chat message", username + ": " + msg);
+  // How to remove username: uncomment the below, comment the above
+  // Add username and "emit" to front end on init
+  /*socket.on("connect", function() {
+
+  });*/
+
+  socket.on("chat message", function(msg) {
+    io.emit("chat message", username, msg);
   });
 
   socket.on("typing", function(msg) {
-    io.emit("typing", username, username + ": " + msg);
+    io.emit("typing", username, msg);
   });
 
   socket.on("not-typing", function(){

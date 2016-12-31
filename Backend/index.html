@@ -27,39 +27,36 @@
     <script src="/socket.io/socket.io.js"></script>
     <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
     <script>
+
+      // Set username in front end instead
+      var username = "user_" + (Math.floor(Math.random()*90000) + 10000).toString();
+
       var socket = io();
 
       // Send to server
       $('form').submit(function(){
-        socket.emit('chat message', $('#m').val());
-        socket.emit('not-typing');
+        socket.emit('chat message', username, $('#m').val());
         $('#m').val('');
         return false;
       });
 
-      $('#m').keypress(function() {
-        socket.emit('typing', " is typing...");
-      });
-
       // Received from server
-      socket.on('chat message', function(msg) {
-        $('#messages').append($('<li>').text(msg));
-      });
-
-      socket.on('typing', function(username, msg) {
-        $('#typing').text(msg);
-      });
-
-      socket.on('not-typing', function() {
-        $('#typing').text("");
-      });
-
       // Connection
-      socket.on('connected', function(username) {
-        $('#messages').append($('<li id="connected">').text(username + " connected"));
+      socket.on('connect', function() {
+        socket.emit('initialize', username);
       });
-      socket.on('disconnected', function(username) {
-        $('#messages').append($('<li id="disconnected">').text(username + " disconnected"));
+
+      socket.on('connected', function(_username) {
+        $('#messages').append($('<li id="connected">').text(_username + " connected"));
+      });
+
+      socket.on('disconnected', function(_username) {
+        $('#messages').append($('<li id="disconnected">').text(_username + " disconnected"));
+      });
+
+      // Message
+      socket.on('chat message', function(_username, msg) {
+        $('#messages').append($('<li>').text(_username + ": " + msg));
       });
 
     </script>

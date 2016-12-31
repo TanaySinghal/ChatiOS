@@ -31,7 +31,7 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
         
-        // username = "user_" + randomString(length: 5)
+        username = "user_" + randomString(length: 5)
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -45,13 +45,18 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     }
     
     override func viewDidAppear(_ animated: Bool) {
-        socket = SocketIOClient(socketURL: URL(string: "http://localhost:3000")!, config: [.log(false), .forcePolling(true)])
+        super.viewDidAppear(animated)
         
-        // Later
-        //socket.emit("connect")
+        socket = SocketIOClient(socketURL: URL(string: "http://localhost:3000")!, config: [.log(false), .forcePolling(true)])
         
         addHandlers()
         socket!.connect()
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        
+        socket?.disconnect()
     }
     
     override func didReceiveMemoryWarning() {
@@ -63,8 +68,12 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     // Socket io handlers
     func addHandlers() {
         
+        // When we connect, initialize with data
+        socket?.on("connect") { data, ack in
+            self.socket?.emit("initialize", self.username)
+        }
         
-        // When somebody connects
+        // When connection is established
         socket?.on("connected") { data, ack in
             
             // Get username
@@ -80,10 +89,10 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         socket?.on("disconnected") { data, ack in
             
             // Get username
-            let username = (data[0] as? String)!
+            let username = (data[0] as? String) ?? ""
             
             // Send system message
-            let message = Message(username: "System", message: "\(username) connected")
+            let message = Message(username: "System", message: "\(username) disconnected")
             self.messages.append(message)
             self.tableView.reloadData()
         }
@@ -106,7 +115,7 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         if inputText != "" {
             
             // Emit message to server
-            socket?.emit("chat message", inputText)
+            socket?.emit("chat message", username, inputText)
             
             // Clear text
             inputField.text = ""
@@ -149,6 +158,7 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         // Do nothing
+        tableView.deselectRow(at: indexPath, animated: true)
     }
     
     

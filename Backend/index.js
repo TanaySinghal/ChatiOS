@@ -2,19 +2,23 @@ var app = require('express')();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
 
+// Check this out:
+// https://gist.github.com/dskanth
+// To make a private chat room, use rooms... use answer with most points
+// http://stackoverflow.com/questions/17476294/how-to-send-a-message-to-a-particular-client-with-socket-io
+
 app.get('/', function (req, res) {
-  //res.send('<h1> Hello world </h1>');
   res.sendFile(__dirname + '/index.html');
 });
 
 io.on('connection', function(socket){
 
-  var server_username = ""
+  //var server_username = ""
 
   io.emit("connect");
 
   socket.on("initialize", function(username) {
-    server_username = username;
+    socket.username = username;
     io.emit("connected", username);
   });
 
@@ -22,8 +26,8 @@ io.on('connection', function(socket){
     io.emit("chat message", username, msg);
   });
 
-  socket.on('disconnect', function(){
-    io.emit("disconnected", server_username);
+  socket.on('disconnect', function() {
+    io.emit("disconnected", socket.username);
   });
 
 });

@@ -29,7 +29,9 @@
     <script>
 
       // Set username in front end instead
-      var username = "user_" + (Math.floor(Math.random()*90000) + 10000).toString();
+      //var username = "user_" + (Math.floor(Math.random()*90000) + 10000).toString();
+
+      var username = prompt("What's your name?");
 
       var socket = io();
 
